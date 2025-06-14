@@ -49,6 +49,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="add-notes"
+        options={{
+          title: 'Add',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="plus.circle" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
