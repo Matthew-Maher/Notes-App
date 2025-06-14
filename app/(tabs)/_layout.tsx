@@ -45,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: 'Notes',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="list.clipboard.fill" color={color} />
           ),
         }}
       />
