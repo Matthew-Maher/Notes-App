@@ -1,54 +1,68 @@
+import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Path, Svg } from 'react-native-svg';
 
 const { height, width } = Dimensions.get('window');
+type Point = { x: number; y: number };
 
 
-export default function NotesScreen() {
-  const [paths, setPaths] = useState<string[][]>([]);
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
+export default function NotesScreen(): React.JSX.Element {
+  const [paths, setPaths] = useState<Point[][]>([]);
+  const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [isClearButtonClicked, setClearButtonClicked] = useState<boolean>(false);
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
       setPaths(prev => [...prev, currentPath]);
       setCurrentPath([]);
-      setClearButtonClicked(false);
     }
   };
 
   const onTouchMove = (event: import('react-native').GestureResponderEvent) => {
-    const locationX = event.nativeEvent.locationX;
-    const locationY = event.nativeEvent.locationY;
-
-    const newPoint = `${currentPath.length === 0 ? 'M' : 'L'}${locationX.toFixed(0)},${locationY.toFixed(0)}`;
-    setCurrentPath(prev => [...prev, newPoint]);
+    const { locationX, locationY } = event.nativeEvent;
+    setCurrentPath(prev => [...prev, { x: locationX, y: locationY }]);
   };
 
   const handleClearButtonClick = () => {
     setPaths([]);
     setCurrentPath([]);
-    setClearButtonClicked(true);
+  };
+  
+  const makeSkiaPath = (points: Point[]) => {
+    const path = Skia.Path.Make();
+    if (points.length > 0) {
+      path.moveTo(points[0].x, points[0].y);
+      points.forEach(p => path.lineTo(p.x, p.y));
+    }
+    return path;
   };
 
   return (
     <View style={styles.container}>
       <View
-        style={styles.svgContainer}
+        style={styles.canvasWrapper}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <Svg height={height} width={width}>
-          <Path
-            d={paths.map(path => path.join(' ')).join(' ')}
-            stroke={isClearButtonClicked ? 'transparent' : 'red'}
-            fill="transparent"
-            strokeWidth={3}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        </Svg>
+        <Canvas style={StyleSheet.absoluteFill}>
+          {paths.map((p, idx) => (
+            <SkiaPath
+              key={idx}
+              path={makeSkiaPath(p)}
+              color="black"
+              style="stroke"
+              strokeWidth={3}
+            />
+          ))}
+          {currentPath.length > 0 && (
+            <SkiaPath
+              path={makeSkiaPath(currentPath)}
+              color="black"
+              style="stroke"
+              strokeWidth={3}
+            />
+          )}
+        </Canvas>
       </View>
 
       <TouchableOpacity style={styles.clearButton} onPress={handleClearButtonClick}>
@@ -63,19 +77,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  svgContainer: {
+  canvasWrapper: {
     height: height * 0.85,
-    width,
-    borderColor: 'black',
+    width: width,
     borderWidth: 2,
+    borderColor: '#000',
   },
   clearButton: {
     marginTop: 10,
     backgroundColor: '#0a7ea4',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 6, // optional: round the corners
-    alignSelf: 'center', // prevent full width; center the button
+    borderRadius: 6,
+    alignSelf: 'center',
   },
   clearButtonText: {
     color: '#fff',
