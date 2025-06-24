@@ -1,38 +1,49 @@
 import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
 
-
 export default function NotesScreen(): React.JSX.Element {
-  const [paths, setPaths] = useState<Point[][]>([]);
+  const [pages, setPages] = useState<Point[][][]>([[]]);
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
-  const [isClearButtonClicked, setClearButtonClicked] = useState<boolean>(false);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
-      setPaths(prev => [...prev, currentPath]);
+      const updatedPages = [...pages];
+      updatedPages[currentPageIndex] = [
+        ...updatedPages[currentPageIndex],
+        currentPath,
+      ];
+      setPages(updatedPages);
       setCurrentPath([]);
     }
   };
 
-  const onTouchMove = (event: import('react-native').GestureResponderEvent) => {
+  const onTouchMove = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
-    setCurrentPath(prev => [...prev, { x: locationX, y: locationY }]);
+    setCurrentPath((prev) => [...prev, { x: locationX, y: locationY }]);
   };
 
-  const handleClearButtonClick = () => {
-    setPaths([]);
-    setCurrentPath([]);
+  const handleAddPage = () => {
+    setPages((prev) => [...prev, []]);
+    setCurrentPageIndex(pages.length);
   };
-  
+
   const makeSkiaPath = (points: Point[]) => {
     const path = Skia.Path.Make();
     if (points.length > 0) {
       path.moveTo(points[0].x, points[0].y);
-      points.forEach(p => path.lineTo(p.x, p.y));
+      points.forEach((p) => path.lineTo(p.x, p.y));
     }
     return path;
   };
@@ -45,7 +56,7 @@ export default function NotesScreen(): React.JSX.Element {
         onTouchEnd={onTouchEnd}
       >
         <Canvas style={StyleSheet.absoluteFill}>
-          {paths.map((p, idx) => (
+          {pages[currentPageIndex].map((p, idx) => (
             <SkiaPath
               key={idx}
               path={makeSkiaPath(p)}
@@ -65,9 +76,21 @@ export default function NotesScreen(): React.JSX.Element {
         </Canvas>
       </View>
 
-      <TouchableOpacity style={styles.clearButton} onPress={handleClearButtonClick}>
-        <Text style={styles.clearButtonText}>Clear</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
+          <Text style={styles.pageButtonText}>+ Add Page</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            const next = (currentPageIndex + 1) % pages.length;
+            setCurrentPageIndex(next);
+          }}
+          style={styles.pageButton}
+        >
+          <Text style={styles.pageButtonText}>Next Page</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -76,22 +99,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    alignItems: 'center',
   },
   canvasWrapper: {
     height: height * 0.85,
     width: width,
     borderWidth: 2,
     borderColor: '#000',
+    marginBottom: 16,
   },
-  clearButton: {
-    marginTop: 10,
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 10,
+    width: '100%',
+  },
+  pageButton: {
     backgroundColor: '#0a7ea4',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 6,
-    alignSelf: 'center',
   },
-  clearButtonText: {
+  pageButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
