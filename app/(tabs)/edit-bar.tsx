@@ -1,4 +1,4 @@
-/*import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -12,7 +12,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-<Tabs
+    <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
@@ -30,14 +30,14 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={5} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={5} name="paperplane.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -45,7 +45,7 @@ export default function TabLayout() {
         options={{
           title: 'Notes',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="list.clipboard.fill" color={color} />
+            <IconSymbol size={5} name="list.clipboard.fill" color={color} />
           ),
         }}
       />
@@ -54,10 +54,10 @@ export default function TabLayout() {
         options={{
           title: 'Add',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="plus.circle" color={color} />
+            <IconSymbol size={5} name="plus.circle" color={color} />
           ),
         }}
       />
     </Tabs>
   );
-}*/
+}
