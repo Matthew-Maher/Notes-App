@@ -50,29 +50,10 @@ export default function NotesScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <View
-        style={styles.canvasWrapper}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+      <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <Canvas style={StyleSheet.absoluteFill}>
-          {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath
-              key={idx}
-              path={makeSkiaPath(p)}
-              color="black"
-              style="stroke"
-              strokeWidth={3}
-            />
-          ))}
-          {currentPath.length > 0 && (
-            <SkiaPath
-              path={makeSkiaPath(currentPath)}
-              color="black"
-              style="stroke"
-              strokeWidth={3}
-            />
-          )}
+          {pages[currentPageIndex].map((p, idx) => (<SkiaPath key={idx} path={makeSkiaPath(p)} color="black" style="stroke" strokeWidth={3}/>))}
+          {currentPath.length > 0 && (<SkiaPath path={makeSkiaPath(currentPath)} color="black" style="stroke" strokeWidth={3}/>)}
         </Canvas>
       </View>
 
@@ -81,13 +62,7 @@ export default function NotesScreen(): React.JSX.Element {
           <Text style={styles.pageButtonText}>+ Add Page</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => {
-            const next = (currentPageIndex + 1) % pages.length;
-            setCurrentPageIndex(next);
-          }}
-          style={styles.pageButton}
-        >
+        <TouchableOpacity onPress={() => {const next = (currentPageIndex + 1) % pages.length; setCurrentPageIndex(next);}} style={styles.pageButton}>
           <Text style={styles.pageButtonText}>Next Page</Text>
         </TouchableOpacity>
       </View>
