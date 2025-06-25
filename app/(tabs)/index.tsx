@@ -1,6 +1,6 @@
 import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
-import {Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
@@ -50,6 +50,10 @@ export default function NotesScreen(): React.JSX.Element {
         </Canvas>
       </View>
 
+      <Text style={styles.pagesIndicator}>
+        Page {currentPageIndex + 1} / {pages.length}
+      </Text>
+
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
           <Text style={styles.pageButtonText}>+ Add Page</Text>
@@ -70,16 +74,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   canvasWrapper: {
-    height: height * 0.85,
+    height: height * 0.82,
     width: width,
     borderWidth: 2,
     borderColor: '#000',
     marginBottom: 16,
   },
+  pagesIndicator: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginVertical: 10,
+    marginVertical: 5,
     width: '100%',
   },
   pageButton: {
