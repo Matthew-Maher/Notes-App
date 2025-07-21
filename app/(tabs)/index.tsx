@@ -10,6 +10,8 @@ export default function NotesScreen(): React.JSX.Element {
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
+
+
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
       const updatedPages = [...pages];
@@ -59,8 +61,11 @@ export default function NotesScreen(): React.JSX.Element {
           <Text style={styles.pageButtonText}>+ Add Page</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => {const last = (currentPageIndex - 1) < 0 ? pages.length-1: (currentPageIndex - 1); setCurrentPageIndex(last);}} style={styles.pageButton}>
+          <Text style={styles.pageButtonText}>{"<"}</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => {const next = (currentPageIndex + 1) % pages.length; setCurrentPageIndex(next);}} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>Next Page</Text>
+          <Text style={styles.pageButtonText}>{">"}</Text>
         </TouchableOpacity>
       </View>
     </View>
