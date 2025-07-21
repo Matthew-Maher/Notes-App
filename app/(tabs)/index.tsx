@@ -58,7 +58,7 @@ export default function NotesScreen(): React.JSX.Element {
 
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>+ Add Page</Text>
+          <Text style={styles.pageButtonText}>+</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => {const last = (currentPageIndex - 1) < 0 ? pages.length-1: (currentPageIndex - 1); setCurrentPageIndex(last);}} style={styles.pageButton}>
