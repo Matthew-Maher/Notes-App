@@ -1,6 +1,9 @@
-import { Canvas, Color, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
+import Slider from '@react-native-community/slider';
+import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+
 
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
@@ -11,15 +14,28 @@ export default function NotesScreen(): React.JSX.Element {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [toolboxVisible, setToolboxVisible] = useState(false); //useState for toolbox toggle with boolean
   const [color, changeColor] = useState("black");
+  const [strokeWidths, setStrokeWidths] = useState<number[][]>([[]]);
+  const [strokeWidth, setStrokeWidth] = useState(3);
+  const [showSlider, setShowSlider] = useState(false);
+
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
       const updatedPages = [...pages];
+      const updatedWidths = [...strokeWidths];
+
       updatedPages[currentPageIndex] = [
         ...updatedPages[currentPageIndex],
         currentPath,
       ];
+
+      updatedWidths[currentPageIndex] = [
+        ...updatedWidths[currentPageIndex],
+        strokeWidth,
+      ];
+
       setPages(updatedPages);
+      setStrokeWidths(updatedWidths);
       setCurrentPath([]);
     }
   };
@@ -31,6 +47,7 @@ export default function NotesScreen(): React.JSX.Element {
 
   const handleAddPage = () => {
     setPages((prev) => [...prev, []]);
+    setStrokeWidths((prev) => [...prev, []]);
     setCurrentPageIndex(pages.length);
   };
 
@@ -52,26 +69,41 @@ export default function NotesScreen(): React.JSX.Element {
 
       {/* Toolbox Panel */}
       {toolboxVisible && ( //only renders if toolboxVisible = true
-        <View style={styles.toolboxPanel}> 
-          <Text style={styles.toolboxLabel}>Toolbox</Text> 
+        <View style={styles.toolboxPanel}>
+          <Text style={styles.toolboxLabel}>Toolbox</Text>
           {/* color and pen width go here. more tags besides text */
-          <View>
-            <TouchableOpacity onPress={() => changeColor("black")} style={styles.blackBtn}></TouchableOpacity>
-            <TouchableOpacity onPress={() => changeColor("red")} style={styles.redBtn}></TouchableOpacity>
-            <TouchableOpacity onPress={() => changeColor("green")} style={styles.greenBtn}></TouchableOpacity>
-            <TouchableOpacity onPress={() => changeColor("blue")} style={styles.blueBtn}></TouchableOpacity>
-          </View>
+            <View>
+              <TouchableOpacity onPress={() => changeColor("black")} style={styles.blackBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => changeColor("red")} style={styles.redBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => changeColor("green")} style={styles.greenBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => changeColor("blue")} style={styles.blueBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowSlider(prev => !prev)} style={styles.pageButton}>
+                <Text style={styles.pageButtonText}>{"Width"}</Text>
+              </TouchableOpacity>
+            </View>
           }
+
+          {showSlider && (
+            <Slider
+              style={styles.strokeSlider}
+              minimumValue={1}
+              maximumValue={10}
+              step={1}
+              value={strokeWidth}
+              onValueChange={setStrokeWidth}
+            />
+          )}
         </View>
       )}
+
 
       <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <Canvas style={StyleSheet.absoluteFill}>
           {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath key={idx} path={makeSkiaPath(p)} color={color} style="stroke" strokeWidth={3} />
+            <SkiaPath key={idx} path={makeSkiaPath(p)} color={color} style="stroke" strokeWidth={strokeWidths[currentPageIndex][idx]} />
           ))}
           {currentPath.length > 0 && (
-            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={3} />
+            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth} />
           )}
         </Canvas>
       </View>
@@ -197,5 +229,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     borderWidth: 1.5,
     margin: 3,
+  },
+  strokeSlider: {
+    width: 200,
+    height: 40,
+    alignSelf: 'center',
+    marginTop: 10,
   },
 });
