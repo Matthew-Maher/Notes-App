@@ -81,11 +81,12 @@ export default function NotesScreen(): React.JSX.Element {
         <View style={styles.toolboxPanel}>
           <Text style={styles.toolboxLabel}>Toolbox</Text>
           {/* color and pen width go here. more tags besides text */
-            <View>
+            <View style={{flexDirection: 'row'}}>
               <TouchableOpacity onPress={() => setColor("black")} style={styles.blackBtn}></TouchableOpacity>
               <TouchableOpacity onPress={() => setColor("red")} style={styles.redBtn}></TouchableOpacity>
               <TouchableOpacity onPress={() => setColor("green")} style={styles.greenBtn}></TouchableOpacity>
               <TouchableOpacity onPress={() => setColor("blue")} style={styles.blueBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setColor("white")} style={styles.eraserBtn}></TouchableOpacity>
               <TouchableOpacity onPress={() => setShowSlider(prev => !prev)} style={styles.pageButton}>
                 <Text style={styles.pageButtonText}>{"Width"}</Text>
               </TouchableOpacity>
@@ -244,5 +245,12 @@ const styles = StyleSheet.create({
     height: 40,
     alignSelf: 'center',
     marginTop: 10,
+  },
+  eraserBtn: {
+    height: 25,
+    width: 25,
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    margin: 3,
   },
 });
