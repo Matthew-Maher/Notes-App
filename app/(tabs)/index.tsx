@@ -1,4 +1,4 @@
-import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
+import { Canvas, Color, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -10,6 +10,7 @@ export default function NotesScreen(): React.JSX.Element {
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [toolboxVisible, setToolboxVisible] = useState(false); //useState for toolbox toggle with boolean
+  const [color, changeColor] = useState("black");
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
@@ -53,17 +54,24 @@ export default function NotesScreen(): React.JSX.Element {
       {toolboxVisible && ( //only renders if toolboxVisible = true
         <View style={styles.toolboxPanel}> 
           <Text style={styles.toolboxLabel}>Toolbox</Text> 
-          {/* color and pen width go here. more tags besides text */}
+          {/* color and pen width go here. more tags besides text */
+          <View>
+            <TouchableOpacity onPress={() => changeColor("black")} style={styles.blackBtn}></TouchableOpacity>
+            <TouchableOpacity onPress={() => changeColor("red")} style={styles.redBtn}></TouchableOpacity>
+            <TouchableOpacity onPress={() => changeColor("green")} style={styles.greenBtn}></TouchableOpacity>
+            <TouchableOpacity onPress={() => changeColor("blue")} style={styles.blueBtn}></TouchableOpacity>
+          </View>
+          }
         </View>
       )}
 
       <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <Canvas style={StyleSheet.absoluteFill}>
           {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath key={idx} path={makeSkiaPath(p)} color="black" style="stroke" strokeWidth={3} />
+            <SkiaPath key={idx} path={makeSkiaPath(p)} color={color} style="stroke" strokeWidth={3} />
           ))}
           {currentPath.length > 0 && (
-            <SkiaPath path={makeSkiaPath(currentPath)} color="black" style="stroke" strokeWidth={3} />
+            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={3} />
           )}
         </Canvas>
       </View>
@@ -74,7 +82,7 @@ export default function NotesScreen(): React.JSX.Element {
 
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>+ Add Page</Text>
+          <Text style={styles.pageButtonText}>+</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => {
@@ -161,5 +169,33 @@ const styles = StyleSheet.create({
   },
   toolboxLabel: {
     fontWeight: 'bold',
+  },
+  redBtn: {
+    height: 25,
+    width: 25,
+    backgroundColor: '#f00',
+    borderWidth: 1.5,
+    margin: 3,
+  },
+  greenBtn: {
+    height: 25,
+    width: 25,
+    backgroundColor: '#0f0',
+    borderWidth: 1.5,
+    margin: 3,
+  },
+  blueBtn: {
+    height: 25,
+    width: 25,
+    backgroundColor: '#00f',
+    borderWidth: 1.5,
+    margin: 3,
+  },
+  blackBtn: {
+    height: 25,
+    width: 25,
+    backgroundColor: '#000',
+    borderWidth: 1.5,
+    margin: 3,
   },
 });
