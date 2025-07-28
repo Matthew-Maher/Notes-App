@@ -13,7 +13,8 @@ export default function NotesScreen(): React.JSX.Element {
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [toolboxVisible, setToolboxVisible] = useState(false); //useState for toolbox toggle with boolean
-  const [color, changeColor] = useState("black");
+  const [colors, setColors] = useState<string[][]>([[]]);
+  const [color, setColor] = useState("black");
   const [strokeWidths, setStrokeWidths] = useState<number[][]>([[]]);
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [showSlider, setShowSlider] = useState(false);
@@ -23,6 +24,7 @@ export default function NotesScreen(): React.JSX.Element {
     if (currentPath.length > 0) {
       const updatedPages = [...pages];
       const updatedWidths = [...strokeWidths];
+      const updatedColors = [...colors];
 
       updatedPages[currentPageIndex] = [
         ...updatedPages[currentPageIndex],
@@ -34,8 +36,14 @@ export default function NotesScreen(): React.JSX.Element {
         strokeWidth,
       ];
 
+      updatedColors[currentPageIndex] = [
+        ...updatedColors[currentPageIndex],
+        color,
+      ];
+
       setPages(updatedPages);
       setStrokeWidths(updatedWidths);
+      setColors(updatedColors);
       setCurrentPath([]);
     }
   };
@@ -48,6 +56,7 @@ export default function NotesScreen(): React.JSX.Element {
   const handleAddPage = () => {
     setPages((prev) => [...prev, []]);
     setStrokeWidths((prev) => [...prev, []]);
+    setColors((prev) => [...prev, []]);
     setCurrentPageIndex(pages.length);
   };
 
@@ -73,10 +82,10 @@ export default function NotesScreen(): React.JSX.Element {
           <Text style={styles.toolboxLabel}>Toolbox</Text>
           {/* color and pen width go here. more tags besides text */
             <View>
-              <TouchableOpacity onPress={() => changeColor("black")} style={styles.blackBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => changeColor("red")} style={styles.redBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => changeColor("green")} style={styles.greenBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => changeColor("blue")} style={styles.blueBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setColor("black")} style={styles.blackBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setColor("red")} style={styles.redBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setColor("green")} style={styles.greenBtn}></TouchableOpacity>
+              <TouchableOpacity onPress={() => setColor("blue")} style={styles.blueBtn}></TouchableOpacity>
               <TouchableOpacity onPress={() => setShowSlider(prev => !prev)} style={styles.pageButton}>
                 <Text style={styles.pageButtonText}>{"Width"}</Text>
               </TouchableOpacity>
@@ -100,7 +109,7 @@ export default function NotesScreen(): React.JSX.Element {
       <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <Canvas style={StyleSheet.absoluteFill}>
           {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath key={idx} path={makeSkiaPath(p)} color={color} style="stroke" strokeWidth={strokeWidths[currentPageIndex][idx]} />
+            <SkiaPath key={idx} path={makeSkiaPath(p)} color={colors[currentPageIndex][idx]} style="stroke" strokeWidth={strokeWidths[currentPageIndex][idx]} />
           ))}
           {currentPath.length > 0 && (
             <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth} />
