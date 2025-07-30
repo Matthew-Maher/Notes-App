@@ -17,7 +17,6 @@ export default function NotesScreen(): React.JSX.Element {
   const [color, setColor] = useState("black");
   const [strokeWidths, setStrokeWidths] = useState<number[][]>([[]]);
   const [strokeWidth, setStrokeWidth] = useState(3);
-  const [showSlider, setShowSlider] = useState(false);
 
 
   const onTouchEnd = () => {
@@ -81,19 +80,21 @@ export default function NotesScreen(): React.JSX.Element {
         <View style={styles.toolboxPanel}>
           <Text style={styles.toolboxLabel}>Toolbox</Text>
           {/* color and pen width go here. more tags besides text */
-            <View style={{flexDirection: 'row'}}>
-              <TouchableOpacity onPress={() => setColor("black")} style={styles.blackBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => setColor("red")} style={styles.redBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => setColor("green")} style={styles.greenBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => setColor("blue")} style={styles.blueBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => setColor("white")} style={styles.eraserBtn}></TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowSlider(prev => !prev)} style={styles.pageButton}>
+            <View>
+              <View style={{flexDirection: 'row'}}>
+                <TouchableOpacity onPress={() => setColor("black")} style={styles.blackBtn}></TouchableOpacity>
+                <TouchableOpacity onPress={() => setColor("red")} style={styles.redBtn}></TouchableOpacity>
+                <TouchableOpacity onPress={() => setColor("green")} style={styles.greenBtn}></TouchableOpacity>
+                <TouchableOpacity onPress={() => setColor("blue")} style={styles.blueBtn}></TouchableOpacity>
+                <TouchableOpacity onPress={() => setColor("white")} style={styles.eraserBtn}></TouchableOpacity>
+              </View>
+              <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
                 <Text style={styles.pageButtonText}>{"Width"}</Text>
               </TouchableOpacity>
             </View>
           }
 
-          {showSlider && (
+          {(
             <Slider
               style={styles.strokeSlider}
               minimumValue={1}
