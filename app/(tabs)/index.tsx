@@ -70,8 +70,19 @@ export default function NotesScreen(): React.JSX.Element {
   };
 
   const clearPage = () => {
-    
-  }
+    const updatedPages = [...pages]; //shallow copies each catagory we need to clear
+    const updatedWidths = [...strokeWidths];
+    const updatedColors = [...colors];
+
+    updatedPages[currentPageIndex] = []; //reset each category (at current index)
+    updatedWidths[currentPageIndex] = [];
+    updatedColors[currentPageIndex] = [];
+
+    setPages(updatedPages); //return andsave changes
+    setStrokeWidths(updatedWidths);
+    setColors(updatedColors);
+};
+
 
   return (
     <View style={styles.container}>
@@ -96,9 +107,6 @@ export default function NotesScreen(): React.JSX.Element {
               <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
                 <Text style={styles.pageButtonText}>{"Width"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => clearPage} style={styles.pageButton}>
-                <Text style={styles.pageButtonText}>{"Clear"}</Text>
-              </TouchableOpacity>
             </View>
           }
 
@@ -112,6 +120,13 @@ export default function NotesScreen(): React.JSX.Element {
               onValueChange={setStrokeWidth}
             />
           )}
+
+          <View>
+            <TouchableOpacity onPress={clearPage} style={styles.pageButton}> {/* Calls Clear Fcn */}
+              <Text style={styles.pageButtonText}>{"Clear"}</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
       )}
 
