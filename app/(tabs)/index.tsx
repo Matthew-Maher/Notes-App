@@ -9,7 +9,7 @@ const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
 
 export default function NotesScreen(): React.JSX.Element {
-  const [pages, setPages] = useState<Point[][][]>([[]]); //pages 3d array
+  const [pages, setPages] = useState<Point[][][]>([[]]); // [page][stroke][point]
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [toolboxVisible, setToolboxVisible] = useState(false); //useState for toolbox toggle with boolean
@@ -50,6 +50,7 @@ export default function NotesScreen(): React.JSX.Element {
   const onTouchMove = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
     setCurrentPath((prev) => [...prev, { x: locationX, y: locationY }]);
+    setToolboxVisible(false); // when drawing minimizes toolbox
   };
 
   const handleAddPage = () => {
@@ -67,6 +68,10 @@ export default function NotesScreen(): React.JSX.Element {
     }
     return path;
   };
+
+  const clearPage = () => {
+    
+  }
 
   return (
     <View style={styles.container}>
@@ -91,6 +96,9 @@ export default function NotesScreen(): React.JSX.Element {
               <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
                 <Text style={styles.pageButtonText}>{"Width"}</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => clearPage} style={styles.pageButton}>
+                <Text style={styles.pageButtonText}>{"Clear"}</Text>
+              </TouchableOpacity>
             </View>
           }
 
@@ -98,7 +106,7 @@ export default function NotesScreen(): React.JSX.Element {
             <Slider
               style={styles.strokeSlider}
               minimumValue={1}
-              maximumValue={10}
+              maximumValue={20}
               step={1}
               value={strokeWidth}
               onValueChange={setStrokeWidth}
@@ -114,7 +122,7 @@ export default function NotesScreen(): React.JSX.Element {
             <SkiaPath key={idx} path={makeSkiaPath(p)} color={colors[currentPageIndex][idx]} style="stroke" strokeWidth={strokeWidths[currentPageIndex][idx]} />
           ))}
           {currentPath.length > 0 && (
-            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth} />
+            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth}/>
           )}
         </Canvas>
       </View>
