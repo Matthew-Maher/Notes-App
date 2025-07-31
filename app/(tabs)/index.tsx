@@ -105,7 +105,7 @@ export default function NotesScreen(): React.JSX.Element {
                 <TouchableOpacity onPress={() => setColor("white")} style={styles.eraserBtn}></TouchableOpacity>
               </View>
               <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
-                <Text style={styles.pageButtonText}>{"Width"}</Text>
+                <Text style={styles.pageButtonText}>Width</Text>
               </TouchableOpacity>
             </View>
           }
@@ -122,11 +122,12 @@ export default function NotesScreen(): React.JSX.Element {
           )}
 
           <View>
-            <TouchableOpacity onPress={clearPage} style={styles.pageButton}> {/* Calls Clear Fcn */}
-              <Text style={styles.pageButtonText}>{"Clear"}</Text>
+            {/* Calls Clear Func */}
+            <TouchableOpacity onPress={clearPage} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>Clear</Text>
             </TouchableOpacity>
           </View>
-
+        
         </View>
       )}
 
