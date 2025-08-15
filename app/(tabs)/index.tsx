@@ -3,13 +3,11 @@ import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-
-
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
 
 export default function NotesScreen(): React.JSX.Element {
-  const [pages, setPages] = useState<Point[][][]>([[]]); // [page][stroke][point]
+  const [pages, setPages] = useState<Point[][][]>([[]]); //[page][stroke][point]
   const [currentPath, setCurrentPath] = useState<Point[]>([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [toolboxVisible, setToolboxVisible] = useState(false); //useState for toolbox toggle with boolean
@@ -17,7 +15,6 @@ export default function NotesScreen(): React.JSX.Element {
   const [color, setColor] = useState("black");
   const [strokeWidths, setStrokeWidths] = useState<number[][]>([[]]);
   const [strokeWidth, setStrokeWidth] = useState(3);
-
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
@@ -50,7 +47,7 @@ export default function NotesScreen(): React.JSX.Element {
   const onTouchMove = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
     setCurrentPath((prev) => [...prev, { x: locationX, y: locationY }]);
-    setToolboxVisible(false); // when drawing minimizes toolbox
+    setToolboxVisible(false); //when drawing minimizes toolbox
   };
 
   const handleAddPage = () => {
@@ -81,8 +78,7 @@ export default function NotesScreen(): React.JSX.Element {
     setPages(updatedPages); //return andsave changes
     setStrokeWidths(updatedWidths);
     setColors(updatedColors);
-};
-
+  };
 
   return (
     <View style={styles.container}>
@@ -95,20 +91,20 @@ export default function NotesScreen(): React.JSX.Element {
       {toolboxVisible && ( //only renders if toolboxVisible = true
         <View style={styles.toolboxPanel}>
           <Text style={styles.toolboxLabel}>Toolbox</Text>
-          {/* color and pen width go here. more tags besides text */
-            <View>
-              <View style={{flexDirection: 'row'}}>
-                <TouchableOpacity onPress={() => setColor("black")} style={styles.blackBtn}></TouchableOpacity>
-                <TouchableOpacity onPress={() => setColor("red")} style={styles.redBtn}></TouchableOpacity>
-                <TouchableOpacity onPress={() => setColor("green")} style={styles.greenBtn}></TouchableOpacity>
-                <TouchableOpacity onPress={() => setColor("blue")} style={styles.blueBtn}></TouchableOpacity>
-                <TouchableOpacity onPress={() => setColor("white")} style={styles.eraserBtn}></TouchableOpacity>
-              </View>
-              <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
-                <Text style={styles.pageButtonText}>Width</Text>
-              </TouchableOpacity>
+          {/* color and pen width go here. more tags besides text */}
+          <View>
+            <View style={{flexDirection: 'row'}}>
+              {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color */}
+              <TouchableOpacity onPress={() => setColor("black")} style={[styles.blackBtn, color === "black" && styles.selectedColor]} />
+              <TouchableOpacity onPress={() => setColor("red")}   style={[styles.redBtn,   color === "red"   && styles.selectedColor]} />
+              <TouchableOpacity onPress={() => setColor("green")} style={[styles.greenBtn, color === "green" && styles.selectedColor]} />
+              <TouchableOpacity onPress={() => setColor("blue")}  style={[styles.blueBtn,  color === "blue"  && styles.selectedColor]} />
+              <TouchableOpacity onPress={() => setColor("white")} style={[styles.eraserBtn, color === "white" && styles.selectedColor]} />
             </View>
-          }
+            <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>Width</Text>
+            </TouchableOpacity>
+          </View>
 
           {(
             <Slider
@@ -127,15 +123,19 @@ export default function NotesScreen(): React.JSX.Element {
               <Text style={styles.pageButtonText}>Clear</Text>
             </TouchableOpacity>
           </View>
-        
         </View>
       )}
-
 
       <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         <Canvas style={StyleSheet.absoluteFill}>
           {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath key={idx} path={makeSkiaPath(p)} color={colors[currentPageIndex][idx]} style="stroke" strokeWidth={strokeWidths[currentPageIndex][idx]} />
+            <SkiaPath
+              key={idx}
+              path={makeSkiaPath(p)}
+              color={colors[currentPageIndex][idx]}
+              style="stroke"
+              strokeWidth={strokeWidths[currentPageIndex][idx]}
+            />
           ))}
           {currentPath.length > 0 && (
             <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth}/>
@@ -179,9 +179,18 @@ const styles = StyleSheet.create({
   canvasWrapper: {
     height: height * 0.82,
     width: width,
-    borderWidth: 2,
-    borderColor: '#000',
+    // updated canvas frame:
+    borderWidth: 1,
+    borderColor: '#E3E7EA', //softer border
+    backgroundColor: '#fff',
+    borderRadius: 16, //rounded corners
+    overflow: 'hidden',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 3,
   },
   pagesIndicator: {
     fontSize: 13,
@@ -237,6 +246,7 @@ const styles = StyleSheet.create({
   toolboxLabel: {
     fontWeight: 'bold',
   },
+  //color blocks
   redBtn: {
     height: 25,
     width: 25,
@@ -265,17 +275,29 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     margin: 3,
   },
-  strokeSlider: {
-    width: 200,
-    height: 40,
-    alignSelf: 'center',
-    marginTop: 10,
-  },
   eraserBtn: {
     height: 25,
     width: 25,
     backgroundColor: '#fff',
     borderWidth: 1.5,
+    borderStyle: 'dashed',   //looks like an eraser
+    borderColor: '#94a3b8',
     margin: 3,
+  },
+  //highlight around current color
+  selectedColor: {
+    borderWidth: 3,
+    borderColor: '#0a7ea4',
+    shadowColor: '#0a7ea4',
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  strokeSlider: {
+    width: 200,
+    height: 40,
+    alignSelf: 'center',
+    marginTop: 10,
   },
 });
