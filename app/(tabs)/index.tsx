@@ -1,12 +1,13 @@
+import { GEMINI_API_KEY } from "@env";
+import { GoogleGenAI } from "@google/genai";
 import Slider from '@react-native-community/slider';
 import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-
-
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 export default function NotesScreen(): React.JSX.Element {
   const [pages, setPages] = useState<Point[][][]>([[]]); // [page][stroke][point]
@@ -81,7 +82,16 @@ export default function NotesScreen(): React.JSX.Element {
     setPages(updatedPages); //return andsave changes
     setStrokeWidths(updatedWidths);
     setColors(updatedColors);
-};
+  };
+
+  const callGemini = async () => {
+    console.log("Gemini's repsonse: ");
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: "Introduce yourself in 1 sentence4.",
+    });
+    console.log(response.text);
+  };
 
 
   return (
@@ -125,6 +135,10 @@ export default function NotesScreen(): React.JSX.Element {
             {/* Calls Clear Func */}
             <TouchableOpacity onPress={clearPage} style={styles.pageButton}>
               <Text style={styles.pageButtonText}>Clear</Text>
+            </TouchableOpacity>
+            {/* Calls Gemini */}
+            <TouchableOpacity onPress={callGemini} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>AI</Text>
             </TouchableOpacity>
           </View>
         
