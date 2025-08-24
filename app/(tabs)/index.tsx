@@ -1,4 +1,3 @@
-import { GEMINI_API_KEY } from "@env";
 import { GoogleGenAI } from "@google/genai";
 import Slider from '@react-native-community/slider';
 import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
@@ -7,7 +6,12 @@ import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, 
 
 const { height, width } = Dimensions.get('window');
 type Point = { x: number; y: number };
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+/* THIS IS FOR TETING PURPOSES ONLY. 
+The key can be visible at compile time when using EXPO_PUBLIC_. 
+For a more secure approach, storing the key in a server would be better.
+Since this is not posted and a free key was used, we opted to use EXPO_PUBLIC_ for efficiency. */
+const ai = new GoogleGenAI({ apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY }); 
 
 export default function NotesScreen(): React.JSX.Element {
   const [pages, setPages] = useState<Point[][][]>([[]]); //[page][stroke][point]
@@ -84,10 +88,10 @@ export default function NotesScreen(): React.JSX.Element {
   };
 
   const callGemini = async () => {
-    console.log("Gemini's repsonse: ");
+    console.log("Gemini's response: ");
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: "Introduce yourself in 1 sentence4.",
+      contents: "Introduce yourself in 1 sentence.",
     });
     console.log(response.text);
   };
