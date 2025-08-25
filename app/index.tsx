@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { SafeAreaView, StatusBar } from "react-native";
 import Slider from '@react-native-community/slider';
 import { Canvas, ImageFormat, Rect, Skia, Path as SkiaPath, useCanvasRef } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
@@ -89,6 +90,14 @@ export default function NotesScreen(): React.JSX.Element {
     setColors(updatedColors);
   };
 
+  const updateColor = (color: string) => {
+    if (strokeWidth > 20 && color != 'white') {
+      setStrokeWidth(20);
+    }
+    setColor(color);
+  }
+
+
   // Snapshot canvas → send JPEG → show response under AI button
   const callGemini = async () => {
     try {
@@ -147,119 +156,123 @@ export default function NotesScreen(): React.JSX.Element {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Toolbox Toggle Button */}
-      <TouchableOpacity onPress={() => setToolboxVisible(prev => !prev)} style={styles.toolboxToggle}>
-        <Text style={styles.toolboxText}>Tools</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0b0c0be4' }}>
+      <StatusBar barStyle="dark-content" backgroundColor='#0b0c0be4' />
+    
+        <View style={styles.container}>
+          {/* Toolbox Toggle Button */}
+          <TouchableOpacity onPress={() => setToolboxVisible(prev => !prev)} style={styles.toolboxToggle}>
+            <Text style={styles.toolboxText}>Tools</Text>
+          </TouchableOpacity>
 
-      {/* Toolbox Panel */}
-      {toolboxVisible && ( //only renders if toolboxVisible = true
-        <View style={styles.toolboxPanel}>
-          <Text style={styles.toolboxLabel}>Toolbox</Text>
-          {/* color and pen width go here. more tags besides text */}
-          <View>
-            <View style={{flexDirection: 'row'}}>
-              {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color highlight */}
-              <TouchableOpacity onPress={() => setColor("black")} style={[styles.blackBtn, color === "black" && styles.selectedColor]} />
-              <TouchableOpacity onPress={() => setColor("red")}   style={[styles.redBtn,   color === "red"   && styles.selectedColor]} />
-              <TouchableOpacity onPress={() => setColor("green")} style={[styles.greenBtn, color === "green" && styles.selectedColor]} />
-              <TouchableOpacity onPress={() => setColor("blue")}  style={[styles.blueBtn,  color === "blue"  && styles.selectedColor]} />
-              <TouchableOpacity onPress={() => setColor("white")} style={[styles.eraserBtn, color === "white" && styles.selectedColor]} />
+          {/* Toolbox Panel */}
+          {toolboxVisible && ( //only renders if toolboxVisible = true
+            <View style={styles.toolboxPanel}>
+              <Text style={styles.toolboxLabel}>Toolbox</Text>
+              {/* color and pen width go here. more tags besides text */}
+              <View>
+                <View style={{flexDirection: 'row'}}>
+                  {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color highlight */}
+                  <TouchableOpacity onPress={() => updateColor("black")} style={[styles.blackBtn, color === "black" && styles.selectedColor]} />
+                  <TouchableOpacity onPress={() => updateColor("red")}   style={[styles.redBtn,   color === "red"   && styles.selectedColor]} />
+                  <TouchableOpacity onPress={() => updateColor("green")} style={[styles.greenBtn, color === "green" && styles.selectedColor]} />
+                  <TouchableOpacity onPress={() => updateColor("blue")}  style={[styles.blueBtn,  color === "blue"  && styles.selectedColor]} />
+                  <TouchableOpacity onPress={() => updateColor("white")} style={[styles.eraserBtn, color === "white" && styles.selectedColor]} />
+                </View>
+                <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
+                  <Text style={styles.pageButtonText}>Width: {strokeWidth}</Text>
+                </TouchableOpacity>
+              </View>
+
+              {(
+                <Slider
+                  style={styles.strokeSlider}
+                  minimumValue={1}
+                  maximumValue={color == 'white' ? 50 : 20}
+                  step={1}
+                  value={strokeWidth}
+                  onValueChange={setStrokeWidth}
+                />
+              )}
+
+              <View>
+                {/* Calls Clear Func */}
+                <TouchableOpacity onPress={clearPage} style={styles.pageButton}>
+                  <Text style={styles.pageButtonText}>Clear</Text>
+                </TouchableOpacity>
+                {/* Calls Gemini */}
+                <TouchableOpacity onPress={callGemini} style={styles.pageButton}>
+                  <Text style={styles.pageButtonText}>AI</Text>
+                </TouchableOpacity>
+
+                {/*Gemini Output*/}
+                {aiText.length > 0 && (
+                  <View style={styles.aiOutputBox}>
+                    <Text style={styles.aiOutputLabel}>AI summary</Text>
+                    <Text style={styles.aiOutputText}>{aiText}</Text>
+                  </View>
+                )}
+
+              </View>
             </View>
-            <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.pageButton}>
-              <Text style={styles.pageButtonText}>Width</Text>
-            </TouchableOpacity>
-          </View>
-
-          {(
-            <Slider
-              style={styles.strokeSlider}
-              minimumValue={1}
-              maximumValue={20}
-              step={1}
-              value={strokeWidth}
-              onValueChange={setStrokeWidth}
-            />
           )}
 
-          <View>
-            {/* Calls Clear Func */}
-            <TouchableOpacity onPress={clearPage} style={styles.pageButton}>
-              <Text style={styles.pageButtonText}>Clear</Text>
-            </TouchableOpacity>
-            {/* Calls Gemini */}
-            <TouchableOpacity onPress={callGemini} style={styles.pageButton}>
-              <Text style={styles.pageButtonText}>AI</Text>
+          <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+            <Canvas ref={canvasRef} style={StyleSheet.absoluteFill}>
+              {/* Solid white background so snapshots aren't black */}
+              <Rect x={0} y={0} width={width} height={height * 0.82} color="white" />
+
+              {pages[currentPageIndex].map((p, idx) => (
+                <SkiaPath
+                  key={idx}
+                  path={makeSkiaPath(p)}
+                  color={colors[currentPageIndex][idx]}
+                  style="stroke"
+                  strokeWidth={strokeWidths[currentPageIndex][idx]}
+                />
+              ))}
+              {currentPath.length > 0 && (
+                <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth}/>
+              )}
+            </Canvas>
+          </View>
+
+          <Text style={styles.pagesIndicator}>
+            Page {currentPageIndex + 1} / {pages.length}
+          </Text>
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>+</Text>
             </TouchableOpacity>
 
-            {/*Gemini Output*/}
-            {aiText.length > 0 && (
-              <View style={styles.aiOutputBox}>
-                <Text style={styles.aiOutputLabel}>AI summary</Text>
-                <Text style={styles.aiOutputText}>{aiText}</Text>
-              </View>
-            )}
+            <TouchableOpacity onPress={() => {
+              const last = (currentPageIndex - 1) < 0 ? pages.length - 1 : (currentPageIndex - 1);
+              setCurrentPageIndex(last);
+            }} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>{"<"}</Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity onPress={() => {
+              const next = (currentPageIndex + 1) % pages.length;
+              setCurrentPageIndex(next);
+            }} style={styles.pageButton}>
+              <Text style={styles.pageButtonText}>{">"}</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      )}
-
-      <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-        <Canvas ref={canvasRef} style={StyleSheet.absoluteFill}>
-          {/* Solid white background so snapshots aren't black */}
-          <Rect x={0} y={0} width={width} height={height * 0.82} color="white" />
-
-          {pages[currentPageIndex].map((p, idx) => (
-            <SkiaPath
-              key={idx}
-              path={makeSkiaPath(p)}
-              color={colors[currentPageIndex][idx]}
-              style="stroke"
-              strokeWidth={strokeWidths[currentPageIndex][idx]}
-            />
-          ))}
-          {currentPath.length > 0 && (
-            <SkiaPath path={makeSkiaPath(currentPath)} color={color} style="stroke" strokeWidth={strokeWidth}/>
-          )}
-        </Canvas>
-      </View>
-
-      <Text style={styles.pagesIndicator}>
-        Page {currentPageIndex + 1} / {pages.length}
-      </Text>
-
-      <View style={styles.buttonRow}>
-        <TouchableOpacity onPress={handleAddPage} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>+</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => {
-          const last = (currentPageIndex - 1) < 0 ? pages.length - 1 : (currentPageIndex - 1);
-          setCurrentPageIndex(last);
-        }} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>{"<"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => {
-          const next = (currentPageIndex + 1) % pages.length;
-          setCurrentPageIndex(next);
-        }} style={styles.pageButton}>
-          <Text style={styles.pageButtonText}>{">"}</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0b0c0be4',
     alignItems: 'center',
   },
   canvasWrapper: {
-    height: height * 0.82,
+    height: height,
     width: width,
     // updated canvas frame:
     borderWidth: 1,
@@ -273,17 +286,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,
     elevation: 3,
+    flex: 1,
   },
   pagesIndicator: {
     fontSize: 13,
     fontWeight: '500',
     marginBottom: 8,
+    color: 'white',
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     marginVertical: 5,
     width: '100%',
+    backgroundColor: '#0b0c0be4',
+    height: height * 0.05,
   },
   pageButton: {
     backgroundColor: '#0a7ea4',
