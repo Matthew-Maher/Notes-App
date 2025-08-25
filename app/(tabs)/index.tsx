@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import Slider from '@react-native-community/slider';
-import { Canvas, Skia, Path as SkiaPath } from '@shopify/react-native-skia';
+import { Canvas, ImageFormat, Rect, Skia, Path as SkiaPath, useCanvasRef } from '@shopify/react-native-skia';
 import React, { useState } from 'react';
 import { Dimensions, GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -22,6 +22,8 @@ export default function NotesScreen(): React.JSX.Element {
   const [color, setColor] = useState("black");
   const [strokeWidths, setStrokeWidths] = useState<number[][]>([[]]);
   const [strokeWidth, setStrokeWidth] = useState(3);
+  const [aiText, setAiText] = useState<string>(""); //store AI output
+  const canvasRef = useCanvasRef(); // Skia canvas ref for snapshotting
 
   const onTouchEnd = () => {
     if (currentPath.length > 0) {
@@ -65,13 +67,13 @@ export default function NotesScreen(): React.JSX.Element {
   };
 
   const makeSkiaPath = (points: Point[]) => {
-    const path = Skia.Path.Make();
-    if (points.length > 0) {
-      path.moveTo(points[0].x, points[0].y);
-      points.forEach((p) => path.lineTo(p.x, p.y));
-    }
-    return path;
-  };
+  const path = Skia.Path.Make();
+  if (points.length > 0) {
+    path.moveTo(points[0].x, points[0].y);
+    points.forEach((p) => path.lineTo(p.x, p.y));
+  }
+  return path;
+};
 
   const clearPage = () => {
     const updatedPages = [...pages]; //shallow copies each catagory we need to clear
@@ -87,15 +89,62 @@ export default function NotesScreen(): React.JSX.Element {
     setColors(updatedColors);
   };
 
+  // Snapshot canvas → send JPEG → show response under AI button
   const callGemini = async () => {
-    console.log("Gemini's response: ");
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: "Introduce yourself in 1 sentence.",
-    });
-    console.log(response.text);
-  };
+    try {
+      if (pages[currentPageIndex].length === 0 && currentPath.length === 0) { //nothing on screen
+        setAiText("No content to analyze yet.");
+        return;
+      }
 
+      // Take snapshot of the current canvas with explicit rect matching the drawing area
+      const image = canvasRef.current?.makeImageSnapshot({
+        x: 0,
+        y: 0,
+        width,
+        height: height * 0.82,
+      });
+      if (!image) { //check image is made
+        setAiText("Could not capture the canvas.");
+        return;
+      }
+
+      const base64 = image.encodeToBase64(ImageFormat.JPEG, 80); //convert so AI can read it
+
+      //send image + instruction
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [
+          { inlineData: { data: base64, mimeType: "image/jpeg" } },
+          { text: "Summarize/ explain/ answer what is written/drawn in at most 4 sentences." }
+        ],
+      });
+
+      // Some SDK versions return errors/messages within the object
+      const serverMsg =
+        (response as any)?.promptFeedback?.blockReason ??
+        (response as any)?.error?.message ??
+        (response as any)?.candidates?.[0]?.finishReason ??
+        "";
+
+      //grab text depending on SDK quirks
+      //The if/ else blocks are fallbacks that check diff types of Gemini responses 
+      let text = "";
+      if (typeof (response as any)?.text === "function") {
+        text = (response as any).text();
+      } else if ((response as any)?.output_text) {
+        text = (response as any).output_text;
+      } else if ((response as any)?.candidates?.[0]?.content?.parts) {
+        text = (response as any).candidates[0].content.parts.map((p: any) => p.text).join(" ");
+      }
+
+      setAiText(String(text).trim()); //apply AI output
+
+    } catch (err) {
+      console.error("Gemini call failed:", err);
+      setAiText("AI request failed.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -111,7 +160,7 @@ export default function NotesScreen(): React.JSX.Element {
           {/* color and pen width go here. more tags besides text */}
           <View>
             <View style={{flexDirection: 'row'}}>
-              {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color */}
+              {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color highlight */}
               <TouchableOpacity onPress={() => setColor("black")} style={[styles.blackBtn, color === "black" && styles.selectedColor]} />
               <TouchableOpacity onPress={() => setColor("red")}   style={[styles.redBtn,   color === "red"   && styles.selectedColor]} />
               <TouchableOpacity onPress={() => setColor("green")} style={[styles.greenBtn, color === "green" && styles.selectedColor]} />
@@ -143,12 +192,24 @@ export default function NotesScreen(): React.JSX.Element {
             <TouchableOpacity onPress={callGemini} style={styles.pageButton}>
               <Text style={styles.pageButtonText}>AI</Text>
             </TouchableOpacity>
+
+            {/*Gemini Output*/}
+            {aiText.length > 0 && (
+              <View style={styles.aiOutputBox}>
+                <Text style={styles.aiOutputLabel}>AI summary</Text>
+                <Text style={styles.aiOutputText}>{aiText}</Text>
+              </View>
+            )}
+
           </View>
         </View>
       )}
 
       <View style={styles.canvasWrapper} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-        <Canvas style={StyleSheet.absoluteFill}>
+        <Canvas ref={canvasRef} style={StyleSheet.absoluteFill}>
+          {/* Solid white background so snapshots aren't black */}
+          <Rect x={0} y={0} width={width} height={height * 0.82} color="white" />
+
           {pages[currentPageIndex].map((p, idx) => (
             <SkiaPath
               key={idx}
@@ -256,7 +317,7 @@ const styles = StyleSheet.create({
     padding: 30,
     borderRadius: 10,
     width: 350, //adjust how long toolbox is
-    height: 300, //adjust how tall toolbox is
+    height: 500, //fixed height for now
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 3 },
@@ -320,5 +381,23 @@ const styles = StyleSheet.create({
     height: 40,
     alignSelf: 'center',
     marginTop: 10,
+  },
+  //AI output styling (under the AI button)
+  aiOutputBox: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E3E7EA',
+  },
+  aiOutputLabel: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: '#0a7ea4',
+  },
+  aiOutputText: {
+    fontSize: 13,
+    color: '#0f172a',
   },
 });
