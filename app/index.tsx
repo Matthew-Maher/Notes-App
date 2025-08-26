@@ -162,7 +162,7 @@ export default function NotesScreen(): React.JSX.Element {
         <View style={styles.container}>
           {/* Toolbox Toggle Button */}
           <TouchableOpacity onPress={() => setToolboxVisible(prev => !prev)} style={styles.toolboxToggle}>
-            <Text style={styles.toolboxText}>Tools</Text>
+            <Text style={styles.toolboxText}>≡</Text>
           </TouchableOpacity>
 
           {/* Toolbox Panel */}
@@ -268,7 +268,7 @@ export default function NotesScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0b0c0be4',
+    backgroundColor: '#101010e4',
     alignItems: 'center',
   },
   canvasWrapper: {
@@ -285,7 +285,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 8,
-    elevation: 3,
     flex: 1,
   },
   pagesIndicator: {
@@ -299,32 +298,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     marginVertical: 5,
     width: '100%',
-    backgroundColor: '#0b0c0be4',
+    backgroundColor: '#101010e4',
     height: height * 0.05,
   },
   pageButton: {
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 10,
+    backgroundColor: '#101010e4',
     paddingHorizontal: 20,
-    borderRadius: 6,
+    justifyContent: 'center',
   },
   pageButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#258761ff',
+    fontWeight: '900',
+    textShadowOffset: {width: 1, height: 1},
+    fontSize: height*0.05*0.8,
   },
   toolboxToggle: { //toolbox button
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: '#0a7ea4',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    backgroundColor: '#101010e4',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 5,
     zIndex: 5, //prevent drawing on top of button (higher = closer to top)
+    shadowOffset: {width: 1.7, height: 1.7},
+    shadowRadius: 1.5,
+    shadowOpacity: 0.6,
+    shadowColor: '#101010e4',
   },
   toolboxText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#258761ff',
+    fontWeight: '800',
+    fontSize: 30,
   },
   toolboxPanel: { //pop-up box
     position: 'absolute',
