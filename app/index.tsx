@@ -172,7 +172,8 @@ export default function NotesScreen(): React.JSX.Element {
             <View>
 
               {/*Container for colors*/}
-              <View style={{ flexDirection: 'row' }}>
+              <View style={styles.toolboxSection}>
+                <Text style={styles.sectionLabel}>Pen Color:</Text>
                 {/* Each Button sets pen color. It only highlights if cond (that color is selected) is true -> applies selected color highlight */}
                 <TouchableOpacity onPress={() => updateColor("black")} style={[styles.blackBtn, color === "black" && styles.selectedColor]} />
                 <TouchableOpacity onPress={() => updateColor("red")} style={[styles.redBtn, color === "red" && styles.selectedColor]} />
@@ -183,10 +184,8 @@ export default function NotesScreen(): React.JSX.Element {
             </View>
 
             {/*Container for Width + Width Slide */}
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-              <TouchableOpacity onPress={() => setStrokeWidth(3)} style={styles.toolBoxPageButton}>
-                <Text style={styles.toolBoxPageButtonText}>Width: {strokeWidth}</Text>
-              </TouchableOpacity>
+            <View style={styles.toolboxSection}>
+                <Text style={styles.sectionLabel}>Width: {strokeWidth}</Text>
               {(
                 <Slider
                   style={styles.strokeSlider}
@@ -369,13 +368,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 60,
     right: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#4b5563',
     padding: 30,
+    paddingTop: 12,
     borderRadius: 10,
     width: 350, //adjust how long toolbox is
     height: 500, //fixed height for now
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 1,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 5,
     elevation: 5,
@@ -383,34 +383,50 @@ const styles = StyleSheet.create({
   },
   toolboxLabel: {
     fontWeight: 'bold',
+    color: '#b5d2fcff',
+    textDecorationLine: 'underline',
+    fontSize: 30,
+    paddingBottom: 20,
+    shadowOpacity: 1,
+    shadowOffset: {width: 2, height: 2},
+  },
+  toolboxSection: {
+    backgroundColor: '#00000052',
+    marginBottom: 5,
+    padding: 20,
+    flexDirection: 'row',
+    borderRadius: 10,
+  },
+  sectionLabel: {
+    color: '#5e9ef7',
+    fontWeight: '500',
   },
   //color blocks
   redBtn: {
     height: 25,
     width: 25,
     backgroundColor: '#f00',
-    borderWidth: 1.5,
+    borderWidth: 2,
     margin: 3,
   },
   greenBtn: {
     height: 25,
     width: 25,
-    backgroundColor: '#0f0',
-    borderWidth: 1.5,
+    backgroundColor: '#0a0',
+    borderWidth: 2,
     margin: 3,
   },
   blueBtn: {
     height: 25,
     width: 25,
     backgroundColor: '#00f',
-    borderWidth: 1.5,
+    borderWidth: 2,
     margin: 3,
   },
   blackBtn: {
     height: 25,
     width: 25,
     backgroundColor: '#000',
-    borderWidth: 1.5,
     margin: 3,
   },
   eraserBtn: {
@@ -425,6 +441,7 @@ const styles = StyleSheet.create({
   //highlight around current color
   selectedColor: {
     borderWidth: 3,
+    borderStyle: 'solid',
     borderColor: '#0a7ea4',
     shadowColor: '#0a7ea4',
     shadowOpacity: 0.3,
