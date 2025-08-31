@@ -1,4 +1,4 @@
-#Notes-App
+# Notes-App
 **Team Project – Summer 2025**
 **Authors:** Matthew Maher, Jack Williams, and Mahatab Hussain
 
