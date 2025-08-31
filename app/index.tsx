@@ -124,7 +124,7 @@ export default function NotesScreen(): React.JSX.Element {
         model: "gemini-2.5-flash",
         contents: [
           { inlineData: { data: base64, mimeType: "image/jpeg" } },
-          { text: "Interpret the content of the screenshot. If it asks a question, respond with only the final answer. Otherwise, summarize in at most 2 sentences." }
+          { text: "Interpret the content of the screenshot. If it asks a question, respond with only the final answer. Otherwise, provide helpful insight in at most 3 sentences." }
         ],
       });
 
