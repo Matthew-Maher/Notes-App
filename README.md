@@ -1,9 +1,10 @@
 # Notes-App
 **Team Project – Summer 2025**
+
 **Authors:** Matthew Maher, Jack Williams, and Mahatab Hussain
 
 ### Overview
-A mobile notes and sketching application built with React Native, Expo, and Skia. This application allows for navigation through multiple note pages and a toolbox for user controls.
+A mobile notes and sketching application built with React Native, Expo, and Skia. 
 Our app integrates with Google Gemini to analyze user notes/ drawings. Gemini offers meaningful insight into the current page's sketched content. 
 
 This project was developed as a collaborative learning experience to strengthen skills in full-stack development, React/TypeScript, UI/UX design, and AI integration.
