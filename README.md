@@ -8,8 +8,8 @@ Our app integrates with Google Gemini to analyze user notes/ drawings. Gemini of
 
 This project was developed as a collaborative learning experience to strengthen skills in full-stack development, React/TypeScript, UI/UX design, and AI integration.
 
-###Notes
-- The majority of our code can be found in index.tsx
+### Notes
+- The majority of our code can be found in the index.tsx file.
 - Git contribution lines may be inaccurate. Please see the commit history to view the steps we took to build the project.
 
 ## Key Features
